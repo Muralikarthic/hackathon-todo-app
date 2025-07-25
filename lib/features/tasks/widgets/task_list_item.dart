@@ -29,10 +29,9 @@ class _TaskListItemState extends ConsumerState<TaskListItem> {
   }
 
   void _onTick(Duration elapsed) {
-    final newRemaining = widget.task.endTime.difference(DateTime.now());
     if (mounted) {
       setState(() {
-        _remaining = newRemaining;
+        _remaining = widget.task.endTime.difference(DateTime.now());
       });
     }
   }
@@ -64,90 +63,95 @@ class _TaskListItemState extends ConsumerState<TaskListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isExpired = _remaining.isNegative;
-    String timerText = isExpired
-        ? 'Expired'
-        : '${_remaining.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(_remaining.inSeconds.remainder(60)).toString().padLeft(2, '0')} left';
-    return Stack(
-      children: [
-        Slidable(
-          key: ValueKey(widget.task.id),
-          endActionPane: ActionPane(
-            motion: const ScrollMotion(),
-            children: [
-              SlidableAction(
-                onPressed: (_) => ref.read(taskListProvider.notifier).delete(widget.task.id),
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                icon: Icons.delete,
-                label: 'Delete',
-              ),
-            ],
+    final isExpired = !_isCompleted() && DateTime.now().isAfter(widget.task.endTime);
+    return Slidable(
+      key: ValueKey(widget.task.id),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (_) => ref.read(taskListProvider.notifier).delete(widget.task.id),
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Delete',
           ),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(widget.task.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, decoration: widget.task.isCompleted ? TextDecoration.lineThrough : null)),
-                      ),
-                      Chip(
-                        label: Text(widget.task.category, style: const TextStyle(color: Colors.white)),
-                        backgroundColor: _categoryColor(widget.task.category),
-                      ),
-                      const SizedBox(width: 6),
-                      Chip(
-                        label: Text(widget.task.priority, style: const TextStyle(color: Colors.white)),
-                        backgroundColor: _priorityColor(widget.task.priority),
-                      ),
-                    ],
+                  Expanded(
+                    child: Text(widget.task.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, decoration: widget.task.isCompleted ? TextDecoration.lineThrough : null)),
                   ),
-                  const SizedBox(height: 4),
-                  Text('Due:  \t${DateFormat.yMMMd().format(widget.task.dueDate)}'),
-                  Text(timerText, style: TextStyle(color: isExpired ? Colors.red : Colors.green)),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Completed'),
-                    value: widget.task.isCompleted,
-                    onChanged: (bool? value) {
-                      final wasCompleted = widget.task.isCompleted;
-                      widget.task.isCompleted = value ?? false;
-                      ref.read(taskListProvider.notifier).update(widget.task);
-                      if (!wasCompleted && (value ?? false)) {
-                        _confettiController.play();
-                      }
-                    },
+                  Chip(
+                    label: Text(widget.task.category, style: const TextStyle(color: Colors.white)),
+                    backgroundColor: _categoryColor(widget.task.category),
+                  ),
+                  const SizedBox(width: 6),
+                  Chip(
+                    label: Text(widget.task.priority, style: const TextStyle(color: Colors.white)),
+                    backgroundColor: _priorityColor(widget.task.priority),
                   ),
                 ],
               ),
-            ),
-          ),
-        ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
-            colors: const [
-              Color(0xFF6C63FF),
-              Color(0xFF48C6EF),
-              Color(0xFFE53935),
-              Color(0xFFFFB300),
-              Color(0xFF43A047),
+              const SizedBox(height: 4),
+              Text('Due:  \t${DateFormat.yMMMd().format(widget.task.dueDate)}'),
+              Row(
+                children: [
+                  if (widget.task.isCompleted)
+                    const Text('Completed', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))
+                  else if (isExpired)
+                    const Text('Expired', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
+                  else
+                    Row(
+                      children: [
+                        const Icon(Icons.timer, size: 18, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(_formatDuration(_remaining), style: const TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  const Spacer(),
+                  Checkbox(
+                    value: widget.task.isCompleted,
+                    onChanged: isExpired
+                        ? null
+                        : (bool? value) {
+                            final wasCompleted = widget.task.isCompleted;
+                            widget.task.isCompleted = value ?? false;
+                            ref.read(taskListProvider.notifier).update(widget.task);
+                            if (!wasCompleted && (value ?? false)) {
+                              _confettiController.play();
+                            }
+                          },
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('Completed'),
+                ],
+              ),
             ],
-            numberOfParticles: 20,
-            maxBlastForce: 20,
-            minBlastForce: 8,
-            emissionFrequency: 0.05,
-            gravity: 0.2,
           ),
         ),
-      ],
+      ),
     );
+  }
+
+  bool _isCompleted() => widget.task.isCompleted;
+
+  String _formatDuration(Duration duration) {
+    if (duration.isNegative) return '00:00';
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final hours = duration.inHours;
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:$minutes:$seconds';
+    } else {
+      return '$minutes:$seconds';
+    }
   }
 }

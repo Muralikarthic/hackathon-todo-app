@@ -5,6 +5,11 @@ import 'package:hackathon_todo_app/features/tasks/screens/task_list_screen.dart'
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hackathon_todo_app/features/login/screens/login_screen.dart';
 import 'package:hackathon_todo_app/features/login/screens/register_screen.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   // Ensure Flutter is ready
@@ -14,8 +19,42 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(TaskAdapter()); // Register the Task adapter
 
+  // Initialize timezone
+  tz.initializeTimeZones();
+
+  // Initialize local notifications
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   // Run the app within a ProviderScope for Riverpod state management
   runApp(const ProviderScope(child: MyApp()));
+}
+
+Future<void> scheduleTaskNotification(int id, String title, DateTime scheduledTime) async {
+  final tz.TZDateTime tzTime = tz.TZDateTime.from(scheduledTime, tz.local);
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    id,
+    'Task Reminder',
+    title,
+    tzTime,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'task_channel',
+        'Task Notifications',
+        channelDescription: 'Notifications for task deadlines',
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    matchDateTimeComponents: DateTimeComponents.dateAndTime,
+  );
+}
+
+Future<void> cancelTaskNotification(int id) async {
+  await flutterLocalNotificationsPlugin.cancel(id);
 }
 
 class MyApp extends StatefulWidget {
