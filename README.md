@@ -1,6 +1,7 @@
 # hackathon_todo_app
 
 A new Flutter project.
+
 This project is a part of a hackathon run by https://www.katomaran.com
 
 ## Getting Started
