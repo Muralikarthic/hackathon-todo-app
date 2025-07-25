@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "715599900172",
+    "project_id": "hackathon-todo-app-f383a",
+    "storage_bucket": "hackathon-todo-app-f383a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:715599900172:android:026904035306ee98574829",
+        "android_client_info": {
+          "package_name": "com.example.hackathon_todo_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-ktEZ24izVDAPCm6Hg5csjZ9NlC2hgrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
