@@ -77,6 +77,8 @@ This is usually caused by:
 If you have any issues building or running the app, please open an issue on this repository with your error log and environment details.
 
 ---
+Android application can be installed through this link:
+https://drive.google.com/file/d/1pIwqXIGwVywr6rSi2V6dgIFmQ-yPbPca/view?usp=sharing
 
 Working of the application watch using the below link:
 https://drive.google.com/file/d/1MO4CIl5EAkfCi3Z-D1IIMInJUttlK2Un/view?usp=sharing
