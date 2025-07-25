@@ -18,6 +18,8 @@ class TaskRepository {
     required String description,
     required DateTime dueDate,
     required DateTime endTime,
+    required String category,
+    required String priority,
   }) async {
     final task = Task(
       id: _uuid.v4(),
@@ -25,6 +27,8 @@ class TaskRepository {
       description: description,
       dueDate: dueDate,
       endTime: endTime,
+      category: category,
+      priority: priority,
     );
     await _taskBox.put(task.id, task);
   }

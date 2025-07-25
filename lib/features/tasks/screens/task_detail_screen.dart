@@ -18,6 +18,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   late TextEditingController _descriptionController;
   late TextEditingController _timerController;
   DateTime? _dueDate;
+  String _selectedCategory = 'Personal';
+  String _selectedPriority = 'Medium';
+  static const List<String> _categories = ['Personal', 'Work', 'Study', 'Shopping', 'Other'];
+  static const List<String> _priorities = ['High', 'Medium', 'Low'];
 
   @override
   void initState() {
@@ -26,6 +30,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     _descriptionController = TextEditingController(text: widget.task?.description ?? '');
     _timerController = TextEditingController();
     _dueDate = widget.task?.dueDate;
+    _selectedCategory = widget.task?.category ?? 'Personal';
+    _selectedPriority = widget.task?.priority ?? 'Medium';
   }
 
   @override
@@ -46,6 +52,20 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: const InputDecoration(labelText: 'Category'),
+                items: _categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
+                onChanged: (val) => setState(() => _selectedCategory = val!),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: _selectedPriority,
+                decoration: const InputDecoration(labelText: 'Priority'),
+                items: _priorities.map((pri) => DropdownMenuItem(value: pri, child: Text(pri))).toList(),
+                onChanged: (val) => setState(() => _selectedPriority = val!),
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -85,6 +105,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                           description: _descriptionController.text,
                           dueDate: _dueDate!,
                           endTime: endTime,
+                          category: _selectedCategory,
+                          priority: _selectedPriority,
                         );
                     Navigator.pop(context);
                   }

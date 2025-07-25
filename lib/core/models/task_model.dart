@@ -22,6 +22,12 @@ class Task extends HiveObject {
   @HiveField(5)
   DateTime endTime;
 
+  @HiveField(6)
+  String category;
+
+  @HiveField(7)
+  String priority;
+
   Task({
     required this.id,
     required this.title,
@@ -29,5 +35,7 @@ class Task extends HiveObject {
     required this.dueDate,
     this.isCompleted = false,
     required this.endTime,
+    this.category = 'Personal',
+    this.priority = 'Medium',
   });
 }

@@ -26,8 +26,22 @@ class TaskList extends _$TaskList {
     return ref.watch(taskRepositoryProvider).getTasks();
   }
 
-  Future<void> add({required String title, required String description, required DateTime dueDate, required DateTime endTime}) async {
-    await ref.read(taskRepositoryProvider).addTask(title: title, description: description, dueDate: dueDate, endTime: endTime);
+  Future<void> add({
+    required String title,
+    required String description,
+    required DateTime dueDate,
+    required DateTime endTime,
+    required String category,
+    required String priority,
+  }) async {
+    await ref.read(taskRepositoryProvider).addTask(
+      title: title,
+      description: description,
+      dueDate: dueDate,
+      endTime: endTime,
+      category: category,
+      priority: priority,
+    );
     ref.invalidateSelf();
   }
 

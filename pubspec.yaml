@@ -29,6 +29,7 @@ dependencies:
   uuid: ^4.4.0
   flutter_slidable: ^3.1.0
   lottie: ^3.1.2 # For animations
+  confetti: ^0.7.0
 
 dev_dependencies:
   flutter_test:
